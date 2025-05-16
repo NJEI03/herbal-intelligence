@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import axios from "axios";
 
 type Message = {
   id: string;
@@ -11,13 +13,16 @@ type Message = {
   timestamp: Date;
 };
 
-// Mock responses for demonstration
+// Mock responses for demonstration when API fails
 const mockResponses = [
   "Based on your symptoms, I recommend considering ginger root (Zingiber officinale), which has been traditionally used to address digestive discomfort. You can prepare it as a tea by steeping fresh ginger slices in hot water for 5-10 minutes. Would you like to know more about ginger or explore other options?",
   "For mild insomnia, valerian root (Valeriana officinalis) has been used traditionally across many cultures. It's typically consumed as a tea or tincture about 30 minutes before bedtime. Would you like to learn about proper dosage or alternative herbs for sleep support?",
   "Turmeric (Curcuma longa) contains curcumin, which has been studied for its anti-inflammatory properties. Consider incorporating it into your diet with black pepper to enhance absorption, or as a supplement. Would you like information about other anti-inflammatory herbs?",
   "Lemon balm (Melissa officinalis) has a long history of use for mild anxiety and stress. It can be consumed as a pleasant-tasting tea, 2-3 times daily. Are you currently taking any medications that might interact with herbal supplements?",
 ];
+
+// API endpoint for herbal consultation
+const API_URL = "https://api.herbalwisdom.com/consult"; // Replace with your actual API endpoint
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -30,6 +35,7 @@ export function ChatInterface() {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to the bottom when messages change
@@ -39,13 +45,33 @@ export function ChatInterface() {
     }
   }, [messages]);
 
-  // Generate a random response for demo purposes
-  const getRandomResponse = () => {
+  // Generate a random response for demo purposes when API fails
+  const getRandomMockResponse = () => {
     const randomIndex = Math.floor(Math.random() * mockResponses.length);
     return mockResponses[randomIndex];
   };
 
-  const handleSendMessage = () => {
+  // Call the actual API
+  const callHerbalAPI = async (userMessage: string) => {
+    try {
+      const response = await axios.post(API_URL, {
+        message: userMessage,
+        userId: "user-" + Date.now(), // Generate a temporary user ID
+        timestamp: new Date().toISOString()
+      });
+      
+      // Return the AI response from the API
+      return response.data.reply || "I'm sorry, I couldn't generate a response at this time.";
+    } catch (error) {
+      console.error("API call failed:", error);
+      toast.error("Couldn't reach our herbal wisdom server. Using backup knowledge instead.");
+      
+      // Return a mock response as fallback
+      return getRandomMockResponse();
+    }
+  };
+
+  const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
     const userMessage: Message = {
@@ -59,23 +85,40 @@ export function ChatInterface() {
     setInputValue("");
     setIsLoading(true);
 
-    // Simulate API delay
-    setTimeout(() => {
+    try {
+      // Call the API to get a response
+      const aiResponse = await callHerbalAPI(userMessage.content);
+      
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: getRandomResponse(),
+        content: aiResponse,
         sender: "ai",
         timestamp: new Date(),
       };
+      
       setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("Error processing message:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const toggleVoiceModal = () => {
+    setIsVoiceModalOpen(!isVoiceModalOpen);
+    if (!isVoiceModalOpen) {
+      toast.info("Voice chat feature coming soon!", {
+        description: "We're working hard to bring you voice capabilities.",
+        duration: 3000,
+      });
     }
   };
 
@@ -94,7 +137,7 @@ export function ChatInterface() {
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 bg-herbal-muted/50">
+      <div className="flex-1 overflow-y-auto p-4 bg-herbal-muted/50 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-green-50 via-herbal-background to-herbal-secondary/5">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -150,16 +193,29 @@ export function ChatInterface() {
             className="resize-none min-h-[60px]"
             rows={2}
           />
-          <Button 
-            className="bg-herbal-primary hover:bg-herbal-primary/90 h-[60px] px-6"
-            onClick={handleSendMessage}
-            disabled={!inputValue.trim() || isLoading}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <path d="M22 2 11 13"></path>
-              <path d="M22 2 15 22 11 13 2 9 22 2z"></path>
-            </svg>
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              className="bg-herbal-primary hover:bg-herbal-primary/90 h-[28px] px-3"
+              onClick={toggleVoiceModal}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+              </svg>
+            </Button>
+            
+            <Button 
+              className="bg-herbal-primary hover:bg-herbal-primary/90 h-[28px] px-3"
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim() || isLoading}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <path d="M22 2 11 13"></path>
+                <path d="M22 2 15 22 11 13 2 9 22 2z"></path>
+              </svg>
+            </Button>
+          </div>
         </div>
         <div className="flex justify-between mt-2 text-xs text-herbal-text-secondary">
           <p>Upload an image of a plant:</p>
@@ -176,6 +232,42 @@ export function ChatInterface() {
           </button>
         </div>
       </div>
+
+      {/* Voice Chat Modal - Coming Soon */}
+      {isVoiceModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+            <h2 className="text-2xl font-bold font-montserrat text-herbal-primary mb-4">Voice Chat</h2>
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="w-24 h-24 rounded-full bg-herbal-secondary/20 flex items-center justify-center mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-herbal-primary">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-2">Coming Soon!</h3>
+                <p className="text-gray-600 mb-4">We're working on adding voice chat capabilities to enhance your herbal consultation experience.</p>
+                <div className="flex justify-center gap-2 mb-2">
+                  <span className="w-2 h-2 rounded-full bg-herbal-primary/40 animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-herbal-primary/60 animate-pulse delay-150"></span>
+                  <span className="w-2 h-2 rounded-full bg-herbal-primary/80 animate-pulse delay-300"></span>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button 
+                onClick={toggleVoiceModal} 
+                variant="outline"
+                className="border-herbal-primary hover:bg-herbal-primary/10 text-herbal-primary"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

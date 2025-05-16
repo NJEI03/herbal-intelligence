@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { Mic, MicOff } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 type Message = {
   id: string;
@@ -30,7 +32,9 @@ export function ChatInterface() {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   // Scroll to the bottom when messages change
   useEffect(() => {
@@ -78,23 +82,34 @@ export function ChatInterface() {
       handleSendMessage();
     }
   };
+  
+  const handleVoiceInput = () => {
+    setIsVoiceModalOpen(true);
+    
+    // Show coming soon toast message
+    toast({
+      title: "Voice Input Coming Soon",
+      description: "We're working on adding voice input capabilities. Stay tuned!",
+      duration: 5000,
+    });
+    
+    // Close the modal after 3 seconds
+    setTimeout(() => {
+      setIsVoiceModalOpen(false);
+    }, 3000);
+  };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-white rounded-xl border border-herbal-secondary/20 shadow-md overflow-hidden">
-      <div className="p-4 bg-herbal-primary text-white flex items-center">
-        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mr-3">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-            <path d="M12 8c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5Z"></path>
-            <path d="M3 12h1m8-9v1m8 8h1m-9 8v1M5.6 5.6l.7.7m12.1-.7-.7.7m0 11.4.7.7m-12.1-.7-.7.7"></path>
-          </svg>
-        </div>
-        <div>
-          <h2 className="font-montserrat font-semibold">Herbal AI Consultant</h2>
-          <p className="text-xs text-white/80">Online now</p>
-        </div>
+    <div className="flex flex-col h-full relative overflow-hidden">
+      {/* Animated background with aurora effect */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-herbal-background via-herbal-muted to-white opacity-70"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(46,125,50,0.1),transparent_70%)] animate-pulse"></div>
+        <div className="aurora-bg"></div>
       </div>
-      
-      <div className="flex-1 overflow-y-auto p-4 bg-herbal-muted/50">
+
+      {/* Chat area */}
+      <div className="flex-1 overflow-y-auto p-4 pb-5">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -108,7 +123,7 @@ export function ChatInterface() {
                 "p-3 rounded-2xl",
                 message.sender === "user"
                   ? "bg-herbal-primary text-white rounded-tr-none"
-                  : "bg-white border border-herbal-secondary/20 rounded-tl-none"
+                  : "bg-white/90 backdrop-blur-sm border border-herbal-secondary/20 rounded-tl-none shadow-sm"
               )}
             >
               {message.content}
@@ -128,7 +143,7 @@ export function ChatInterface() {
         ))}
         {isLoading && (
           <div className="flex mb-4 max-w-[80%] mr-auto">
-            <div className="bg-white p-3 rounded-2xl rounded-tl-none border border-herbal-secondary/20">
+            <div className="bg-white/90 backdrop-blur-sm p-3 rounded-2xl rounded-tl-none border border-herbal-secondary/20 shadow-sm">
               <div className="flex gap-1">
                 <div className="w-2 h-2 rounded-full bg-herbal-primary/40 animate-pulse"></div>
                 <div className="w-2 h-2 rounded-full bg-herbal-primary/60 animate-pulse delay-150"></div>
@@ -140,16 +155,25 @@ export function ChatInterface() {
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="p-4 border-t border-gray-200 bg-white">
+      {/* Input area */}
+      <div className="p-4 border-t border-gray-200 bg-white/80 backdrop-blur-sm">
         <div className="flex items-end gap-2">
           <Textarea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your health concern or question..."
-            className="resize-none min-h-[60px]"
+            className="resize-none min-h-[60px] bg-white/80"
             rows={2}
           />
+          <Button 
+            onClick={handleVoiceInput}
+            variant="outline"
+            className="h-[60px] px-4 border-herbal-secondary/20 bg-white/80"
+            disabled={isLoading}
+          >
+            <Mic size={20} className="text-herbal-primary" />
+          </Button>
           <Button 
             className="bg-herbal-primary hover:bg-herbal-primary/90 h-[60px] px-6"
             onClick={handleSendMessage}
@@ -176,6 +200,28 @@ export function ChatInterface() {
           </button>
         </div>
       </div>
+
+      {/* Voice input modal */}
+      {isVoiceModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 animate-ping rounded-full bg-herbal-primary/20 flex items-center justify-center"></div>
+                <div className="absolute inset-0 animate-ping delay-300 rounded-full bg-herbal-primary/10 flex items-center justify-center"></div>
+                <MicOff size={48} className="relative text-herbal-primary" />
+              </div>
+            </div>
+            <h3 className="text-xl font-semibold mt-4">Voice Chat Coming Soon</h3>
+            <p className="text-gray-600 mt-2">
+              We're working on adding voice input capabilities to enhance your consultation experience.
+            </p>
+            <p className="text-herbal-primary font-medium mt-4">
+              Stay tuned for updates!
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

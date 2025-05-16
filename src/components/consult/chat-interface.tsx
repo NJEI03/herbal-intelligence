@@ -80,7 +80,7 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-10rem)] max-h-[800px] bg-white rounded-xl border border-herbal-secondary/20 shadow-md overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-white rounded-xl border border-herbal-secondary/20 shadow-md overflow-hidden">
       <div className="p-4 bg-herbal-primary text-white flex items-center">
         <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mr-3">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">

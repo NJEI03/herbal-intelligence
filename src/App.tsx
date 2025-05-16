@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Consult from "./pages/Consult";
 import Identify from "./pages/Identify";
 import Practitioners from "./pages/Practitioners";
+import Learn from "./pages/Learn";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/consult" element={<Consult />} />
             <Route path="/identify" element={<Identify />} />
             <Route path="/practitioners" element={<Practitioners />} />
+            <Route path="/learn" element={<Learn />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

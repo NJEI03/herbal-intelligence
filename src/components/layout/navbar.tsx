@@ -58,6 +58,9 @@ export function Navbar() {
           <Link to="/practitioners" className="text-herbal-text-primary hover:text-herbal-primary transition-colors">
             Practitioners
           </Link>
+          <Link to="/store" className="text-herbal-text-primary hover:text-herbal-primary transition-colors">
+            Store
+          </Link>
           <Link to="/learn" className="text-herbal-text-primary hover:text-herbal-primary transition-colors">
             Learn
           </Link>
@@ -107,6 +110,13 @@ export function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           >
             Practitioners
+          </Link>
+          <Link 
+            to="/store" 
+            className="px-4 py-2 rounded-md hover:bg-herbal-muted"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Store
           </Link>
           <Link 
             to="/learn" 

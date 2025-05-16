@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -62,10 +63,6 @@ export default {
 					text: {
 						primary: '#212121', // near-black
 						secondary: '#424242', // gray
-					},
-					muted: {
-						DEFAULT: '#F9FBE7', // soft cream
-						foreground: '#424242' // gray
 					}
 				}
 			},
@@ -95,22 +92,16 @@ export default {
 				slideUp: {
 					'0%': { transform: 'translateY(20px)', opacity: '0' },
 					'100%': { transform: 'translateY(0)', opacity: '1' }
-				},
-				'gradient-slow': {
-					'0%, 100%': { backgroundPosition: '0% 50%' },
-					'50%': { backgroundPosition: '100% 50%' },
-				},
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fadeIn 0.5s ease-out forwards',
 				'slide-up': 'slideUp 0.5s ease-out forwards',
-				'gradient-slow': 'gradient-slow 15s ease infinite',
 			},
 			backgroundImage: {
 				'herbal-gradient': 'linear-gradient(to right, #2E7D32, #81C784)',
-				'aurora-gradient': 'linear-gradient(to right, #81C784, #E5DEFF, #D3E4FD)',
 			}
 		}
 	},

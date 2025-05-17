@@ -8,22 +8,22 @@ export function FeaturedPractitioners() {
     {
       name: "Dr. Amara Okafor",
       specialty: "Traditional African Medicine",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200",
-      location: "Nairobi, Kenya",
+      image: "https://images.unsplash.com/photo-1601233749202-95d04d5b3c00?auto=format&fit=crop&q=80&w=200&h=200",
+      location: "Douala, Cameroon",
       verified: true,
     },
     {
-      name: "Maria Garcia",
-      specialty: "South American Herbalism",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200&h=200",
-      location: "Lima, Peru",
+      name: "Marie Nguema",
+      specialty: "Central African Herbalism",
+      image: "https://images.unsplash.com/photo-1612462766564-8d2cce92cb95?auto=format&fit=crop&q=80&w=200&h=200",
+      location: "Yaoundé, Cameroon",
       verified: true,
     },
     {
-      name: "Li Wei",
-      specialty: "Traditional Chinese Medicine",
-      image: "https://images.unsplash.com/photo-1568822617270-2c1579f8dfe2?auto=format&fit=crop&q=80&w=200&h=200",
-      location: "Remote Only",
+      name: "Dr. Emmanuel Fongod",
+      specialty: "Rainforest Medicinal Plants",
+      image: "https://images.unsplash.com/photo-1603366615917-1fa6dad5c4fa?auto=format&fit=crop&q=80&w=200&h=200",
+      location: "Buea, Cameroon",
       verified: true,
     },
   ];
@@ -33,7 +33,7 @@ export function FeaturedPractitioners() {
       <div className="container">
         <SectionHeading
           title="Featured Practitioners"
-          subtitle="Connect with verified traditional healers from around the world"
+          subtitle="Connect with verified traditional healers from Cameroon"
           centered
         />
 

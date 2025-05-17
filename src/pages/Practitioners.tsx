@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
@@ -14,45 +13,45 @@ const Practitioners = () => {
     {
       id: 1,
       name: "Dr. Amara Okafor",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200",
+      image: "https://images.unsplash.com/photo-1601233749202-95d04d5b3c00?auto=format&fit=crop&q=80&w=200&h=200",
       specialty: "Traditional African Medicine",
-      location: "Nairobi, Kenya",
-      languages: ["English", "Swahili", "Yoruba"],
+      location: "Douala, Cameroon",
+      languages: ["English", "French", "Duala"],
       experience: "15+ years",
       bio: "Specializing in herbal remedies for digestive and respiratory conditions. Dr. Okafor combines traditional African knowledge with modern scientific understanding.",
       verified: true,
     },
     {
       id: 2,
-      name: "Maria Garcia",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200&h=200",
-      specialty: "South American Herbalism",
-      location: "Lima, Peru",
-      languages: ["Spanish", "English", "Portuguese"],
+      name: "Marie Nguema",
+      image: "https://images.unsplash.com/photo-1612462766564-8d2cce92cb95?auto=format&fit=crop&q=80&w=200&h=200",
+      specialty: "Central African Herbalism",
+      location: "Yaoundé, Cameroon",
+      languages: ["French", "English", "Ewondo"],
       experience: "12 years",
-      bio: "Expert in Amazonian plants for immune support and women's health issues. Maria comes from a long lineage of traditional healers.",
+      bio: "Expert in Central African plants for immune support and women's health issues. Marie comes from a long lineage of traditional healers.",
       verified: true,
     },
     {
       id: 3,
-      name: "Li Wei",
-      image: "https://images.unsplash.com/photo-1568822617270-2c1579f8dfe2?auto=format&fit=crop&q=80&w=200&h=200",
-      specialty: "Traditional Chinese Medicine",
-      location: "Remote Only",
-      languages: ["Mandarin", "English"],
+      name: "Dr. Emmanuel Fongod",
+      image: "https://images.unsplash.com/photo-1603366615917-1fa6dad5c4fa?auto=format&fit=crop&q=80&w=200&h=200",
+      specialty: "Rainforest Medicinal Plants",
+      location: "Buea, Cameroon",
+      languages: ["English", "French", "Pidgin"],
       experience: "20+ years",
-      bio: "Specializing in acupuncture and herbal formulas for chronic conditions. Li Wei practices a holistic approach to balance mind, body, and spirit.",
+      bio: "Specializing in native plants from Cameroon's rainforests for chronic conditions. Dr. Fongod practices a holistic approach to balance mind, body, and spirit.",
       verified: true,
     },
     {
       id: 4,
-      name: "Anita Patel",
-      image: "https://images.unsplash.com/photo-1573497019236-17f8177b81e8?auto=format&fit=crop&q=80&w=200&h=200",
-      specialty: "Ayurvedic Medicine",
-      location: "Mumbai, India",
-      languages: ["Hindi", "English", "Gujarati"],
+      name: "Josephine Mbarga",
+      image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=200&h=200",
+      specialty: "Traditional Midwifery & Women's Health",
+      location: "Limbe, Cameroon",
+      languages: ["English", "French"],
       experience: "10 years",
-      bio: "Ayurvedic practitioner focusing on personalized wellness plans, nutrition, and herbal remedies based on individual doshas.",
+      bio: "Specializing in women's reproductive health using traditional plant-based remedies. Josephine combines ancestral knowledge with contemporary healthcare practices.",
       verified: true,
     }
   ];
@@ -62,7 +61,7 @@ const Practitioners = () => {
       <div className="container">
         <SectionHeading 
           title="Find Traditional Practitioners"
-          subtitle="Connect with verified herbal medicine experts for personal consultations"
+          subtitle="Connect with verified herbal medicine experts from Cameroon and beyond"
           className="mb-10"
         />
         
@@ -87,9 +86,9 @@ const Practitioners = () => {
                   <SelectContent>
                     <SelectItem value="all">All Specialties</SelectItem>
                     <SelectItem value="african">Traditional African Medicine</SelectItem>
-                    <SelectItem value="chinese">Traditional Chinese Medicine</SelectItem>
-                    <SelectItem value="ayurvedic">Ayurvedic Medicine</SelectItem>
-                    <SelectItem value="south-american">South American Herbalism</SelectItem>
+                    <SelectItem value="rainforest">Rainforest Medicinal Plants</SelectItem>
+                    <SelectItem value="women">Women's Health</SelectItem>
+                    <SelectItem value="central-african">Central African Herbalism</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -102,10 +101,10 @@ const Practitioners = () => {
                   <SelectContent>
                     <SelectItem value="any">Any Language</SelectItem>
                     <SelectItem value="english">English</SelectItem>
-                    <SelectItem value="spanish">Spanish</SelectItem>
-                    <SelectItem value="mandarin">Mandarin</SelectItem>
-                    <SelectItem value="hindi">Hindi</SelectItem>
-                    <SelectItem value="swahili">Swahili</SelectItem>
+                    <SelectItem value="french">French</SelectItem>
+                    <SelectItem value="duala">Duala</SelectItem>
+                    <SelectItem value="ewondo">Ewondo</SelectItem>
+                    <SelectItem value="pidgin">Pidgin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

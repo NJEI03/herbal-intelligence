@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import axios from "axios";
+import { Mic, MicOff } from "lucide-react";
 
 type Message = {
   id: string;
@@ -36,6 +37,7 @@ export function ChatInterface() {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to the bottom when messages change
@@ -122,6 +124,18 @@ export function ChatInterface() {
     }
   };
 
+  const toggleVoiceNote = () => {
+    setIsRecording(!isRecording);
+    
+    if (!isRecording) {
+      // Show toast when user tries to start recording
+      toast.info("Voice note feature coming soon!", {
+        description: "We're working on adding voice note capabilities.",
+        duration: 3000,
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-white rounded-xl border border-herbal-secondary/20 shadow-md overflow-hidden">
       <div className="p-4 bg-herbal-primary text-white flex items-center">
@@ -203,6 +217,18 @@ export function ChatInterface() {
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                 <line x1="12" y1="19" x2="12" y2="22"></line>
               </svg>
+            </Button>
+            
+            <Button
+              className={cn(
+                "h-[28px] px-3 transition-colors",
+                isRecording 
+                  ? "bg-red-500 hover:bg-red-600" 
+                  : "bg-herbal-primary hover:bg-herbal-primary/90"
+              )}
+              onClick={toggleVoiceNote}
+            >
+              {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </Button>
             
             <Button 

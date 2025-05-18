@@ -14,16 +14,17 @@ type Message = {
   timestamp: Date;
 };
 
-// Mock responses for demonstration when API fails
+// API configuration
+const API_URL = "https://herbalai.deepxlabs.tech/api/prompt";
+const API_KEY = "68289d7d0ce9b";
+
+// Mock responses for fallback if API fails
 const mockResponses = [
   "Based on your symptoms, I recommend considering ginger root (Zingiber officinale), which has been traditionally used to address digestive discomfort. You can prepare it as a tea by steeping fresh ginger slices in hot water for 5-10 minutes. Would you like to know more about ginger or explore other options?",
   "For mild insomnia, valerian root (Valeriana officinalis) has been used traditionally across many cultures. It's typically consumed as a tea or tincture about 30 minutes before bedtime. Would you like to learn about proper dosage or alternative herbs for sleep support?",
   "Turmeric (Curcuma longa) contains curcumin, which has been studied for its anti-inflammatory properties. Consider incorporating it into your diet with black pepper to enhance absorption, or as a supplement. Would you like information about other anti-inflammatory herbs?",
   "Lemon balm (Melissa officinalis) has a long history of use for mild anxiety and stress. It can be consumed as a pleasant-tasting tea, 2-3 times daily. Are you currently taking any medications that might interact with herbal supplements?",
 ];
-
-// API endpoint for herbal consultation
-const API_URL = "https://api.herbalwisdom.com/consult"; // Replace with your actual API endpoint
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -47,23 +48,23 @@ export function ChatInterface() {
     }
   }, [messages]);
 
-  // Generate a random response for demo purposes when API fails
-  const getRandomMockResponse = () => {
-    const randomIndex = Math.floor(Math.random() * mockResponses.length);
-    return mockResponses[randomIndex];
-  };
-
-  // Call the actual API
+  // Call the actual API with proper headers
   const callHerbalAPI = async (userMessage: string) => {
     try {
-      const response = await axios.post(API_URL, {
-        message: userMessage,
-        userId: "user-" + Date.now(), // Generate a temporary user ID
-        timestamp: new Date().toISOString()
-      });
+      const response = await axios.post(
+        API_URL,
+        { message: userMessage },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'API_KEY': API_KEY
+          }
+        }
+      );
       
       // Return the AI response from the API
-      return response.data.reply || "I'm sorry, I couldn't generate a response at this time.";
+      console.log("API response:", response.data);
+      return response.data.response || response.data.reply || response.data.message || "I'm sorry, I couldn't generate a response at this time.";
     } catch (error) {
       console.error("API call failed:", error);
       toast.error("Couldn't reach our herbal wisdom server. Using backup knowledge instead.");
@@ -71,6 +72,12 @@ export function ChatInterface() {
       // Return a mock response as fallback
       return getRandomMockResponse();
     }
+  };
+
+  // Generate a random response for demo purposes when API fails
+  const getRandomMockResponse = () => {
+    const randomIndex = Math.floor(Math.random() * mockResponses.length);
+    return mockResponses[randomIndex];
   };
 
   const handleSendMessage = async () => {

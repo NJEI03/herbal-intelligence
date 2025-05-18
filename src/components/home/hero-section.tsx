@@ -5,17 +5,6 @@ import { Button } from "@/components/ui/button";
 export function HeroSection() {
   return (
     <section className="relative py-20 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#E5DEFF] via-[#B8E1FF] to-[#9CECFB] opacity-80">
-        <div className="absolute inset-0 opacity-30">
-          <svg width="100%" height="100%">
-            <pattern id="leaf-pattern" width="120" height="120" patternUnits="userSpaceOnUse">
-              <path d="M60,0 Q90,30 60,60 Q30,90 0,60 Q30,30 60,0" fill="white" />
-            </pattern>
-            <rect width="100%" height="100%" fill="url(#leaf-pattern)" />
-          </svg>
-        </div>
-      </div>
-      
       <div className="container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-6">
@@ -43,7 +32,7 @@ export function HeroSection() {
           </div>
           
           <div className="flex items-center justify-center">
-            <div className="relative bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <div className="relative bg-white/90 backdrop-blur-sm p-6 rounded-lg shadow-xl w-full max-w-md">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
                   <img 

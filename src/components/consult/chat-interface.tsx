@@ -14,9 +14,16 @@ type Message = {
   timestamp: Date;
 };
 
-// Real API endpoint and key for herbal consultation
-const API_URL = "https://herbalai.deepxlabs.tech/api/prompt";
-const API_KEY = "68289d7d0ce9b";
+// Mock responses for demonstration when API fails
+const mockResponses = [
+  "Based on your symptoms, I recommend considering ginger root (Zingiber officinale), which has been traditionally used to address digestive discomfort. You can prepare it as a tea by steeping fresh ginger slices in hot water for 5-10 minutes. Would you like to know more about ginger or explore other options?",
+  "For mild insomnia, valerian root (Valeriana officinalis) has been used traditionally across many cultures. It's typically consumed as a tea or tincture about 30 minutes before bedtime. Would you like to learn about proper dosage or alternative herbs for sleep support?",
+  "Turmeric (Curcuma longa) contains curcumin, which has been studied for its anti-inflammatory properties. Consider incorporating it into your diet with black pepper to enhance absorption, or as a supplement. Would you like information about other anti-inflammatory herbs?",
+  "Lemon balm (Melissa officinalis) has a long history of use for mild anxiety and stress. It can be consumed as a pleasant-tasting tea, 2-3 times daily. Are you currently taking any medications that might interact with herbal supplements?",
+];
+
+// API endpoint for herbal consultation
+const API_URL = "https://api.herbalwisdom.com/consult"; // Replace with your actual API endpoint
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -29,6 +36,7 @@ export function ChatInterface() {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -39,28 +47,29 @@ export function ChatInterface() {
     }
   }, [messages]);
 
-  // Call the actual API with authentication
+  // Generate a random response for demo purposes when API fails
+  const getRandomMockResponse = () => {
+    const randomIndex = Math.floor(Math.random() * mockResponses.length);
+    return mockResponses[randomIndex];
+  };
+
+  // Call the actual API
   const callHerbalAPI = async (userMessage: string) => {
     try {
-      const response = await axios.post(
-        API_URL, 
-        {
-          prompt: userMessage,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'API_KEY': API_KEY
-          }
-        }
-      );
+      const response = await axios.post(API_URL, {
+        message: userMessage,
+        userId: "user-" + Date.now(), // Generate a temporary user ID
+        timestamp: new Date().toISOString()
+      });
       
       // Return the AI response from the API
-      return response.data.response || "I'm sorry, I couldn't generate a response at this time.";
+      return response.data.reply || "I'm sorry, I couldn't generate a response at this time.";
     } catch (error) {
       console.error("API call failed:", error);
-      toast.error("Couldn't reach our herbal wisdom server.");
-      throw error;
+      toast.error("Couldn't reach our herbal wisdom server. Using backup knowledge instead.");
+      
+      // Return a mock response as fallback
+      return getRandomMockResponse();
     }
   };
 
@@ -102,6 +111,16 @@ export function ChatInterface() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const toggleVoiceModal = () => {
+    setIsVoiceModalOpen(!isVoiceModalOpen);
+    if (!isVoiceModalOpen) {
+      toast.info("Voice chat feature coming soon!", {
+        description: "We're working hard to bring you voice capabilities.",
+        duration: 3000,
+      });
     }
   };
 
@@ -228,6 +247,42 @@ export function ChatInterface() {
           </button>
         </div>
       </div>
+
+      {/* Voice Chat Modal - Coming Soon */}
+      {isVoiceModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+            <h2 className="text-2xl font-bold font-montserrat text-herbal-primary mb-4">Voice Chat</h2>
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="w-24 h-24 rounded-full bg-herbal-secondary/20 flex items-center justify-center mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-herbal-primary">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-2">Coming Soon!</h3>
+                <p className="text-gray-600 mb-4">We're working on adding voice chat capabilities to enhance your herbal consultation experience.</p>
+                <div className="flex justify-center gap-2 mb-2">
+                  <span className="w-2 h-2 rounded-full bg-herbal-primary/40 animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-herbal-primary/60 animate-pulse delay-150"></span>
+                  <span className="w-2 h-2 rounded-full bg-herbal-primary/80 animate-pulse delay-300"></span>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button 
+                onClick={toggleVoiceModal} 
+                variant="outline"
+                className="border-herbal-primary hover:bg-herbal-primary/10 text-herbal-primary"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 
 export function Footer() {
@@ -8,8 +7,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                <span className="font-bold text-herbal-primary">HI</span>
+              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/lovable-uploads/cab56773-7d06-44ec-9010-f4806f6577cd.png" 
+                  alt="Herbal Intelligence" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="font-montserrat text-xl font-semibold">
                 Herbal<span className="text-white">Intelligence</span>

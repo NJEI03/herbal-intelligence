@@ -15,8 +15,12 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-herbal-gradient flex items-center justify-center">
-            <span className="font-bold text-white">HI</span>
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/cab56773-7d06-44ec-9010-f4806f6577cd.png" 
+              alt="Herbal Intelligence Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <span className="font-montserrat text-xl font-semibold">
             Herbal<span className="text-herbal-primary">Intelligence</span>

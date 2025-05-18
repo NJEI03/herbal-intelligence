@@ -19,9 +19,16 @@ export function HeroSection() {
       <div className="container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-6">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-herbal-primary leading-tight animate-fade-in">
-              Natural Healing<br />Powered by AI
-            </h1>
+            <div className="flex items-center gap-4 mb-4">
+              <img 
+                src="/lovable-uploads/cab56773-7d06-44ec-9010-f4806f6577cd.png" 
+                alt="Herbal Intelligence Logo" 
+                className="w-16 h-16"
+              />
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-herbal-primary leading-tight animate-fade-in">
+                Natural Healing<br />Powered by AI
+              </h1>
+            </div>
             <p className="text-xl text-herbal-text-primary opacity-90 animate-slide-up">
               Connect with traditional herbal medicine knowledge through AI consultation and find natural alternatives to conventional treatments.
             </p>
@@ -38,8 +45,12 @@ export function HeroSection() {
           <div className="flex items-center justify-center">
             <div className="relative bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-herbal-gradient rounded-full flex items-center justify-center">
-                  <span className="font-bold text-white text-xl">HI</span>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/cab56773-7d06-44ec-9010-f4806f6577cd.png" 
+                    alt="Herbal Intelligence" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <h2 className="text-xl font-semibold">Join Herbal Intelligence</h2>
               </div>

@@ -9,11 +9,11 @@ export function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-6">
             <div className="flex items-center gap-4 mb-4">
-              <img 
+              {/* <img 
                 src="/lovable-uploads/cab56773-7d06-44ec-9010-f4806f6577cd.png" 
                 alt="Herbal Intelligence Logo" 
                 className="w-16 h-16"
-              />
+              /> */}
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-herbal-primary leading-tight animate-fade-in">
                 Natural Healing<br />Powered by AI
               </h1>

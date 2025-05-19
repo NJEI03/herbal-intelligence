@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,17 +13,17 @@ type Message = {
   timestamp: Date;
 };
 
-// API configuration
-const API_URL = "https://herbalai.deepxlabs.tech/api/prompt";
-const API_KEY = "68289d7d0ce9b";
-
-// Mock responses for fallback if API fails
+// Mock responses for demonstration when API fails
 const mockResponses = [
   "Based on your symptoms, I recommend considering ginger root (Zingiber officinale), which has been traditionally used to address digestive discomfort. You can prepare it as a tea by steeping fresh ginger slices in hot water for 5-10 minutes. Would you like to know more about ginger or explore other options?",
   "For mild insomnia, valerian root (Valeriana officinalis) has been used traditionally across many cultures. It's typically consumed as a tea or tincture about 30 minutes before bedtime. Would you like to learn about proper dosage or alternative herbs for sleep support?",
   "Turmeric (Curcuma longa) contains curcumin, which has been studied for its anti-inflammatory properties. Consider incorporating it into your diet with black pepper to enhance absorption, or as a supplement. Would you like information about other anti-inflammatory herbs?",
   "Lemon balm (Melissa officinalis) has a long history of use for mild anxiety and stress. It can be consumed as a pleasant-tasting tea, 2-3 times daily. Are you currently taking any medications that might interact with herbal supplements?",
 ];
+
+// API endpoint for herbal consultation
+const API_URL = "https://herbalai.deepxlabs.tech/api/prompt"; // Updated API endpoint
+const API_KEY = "68289d7d0ce9b"; // API key for authentication
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -48,36 +47,42 @@ export function ChatInterface() {
     }
   }, [messages]);
 
-  // Call the actual API with proper headers
-  const callHerbalAPI = async (userMessage: string) => {
-    try {
-      const response = await axios.post(
-        API_URL,
-        { message: userMessage },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'API_KEY': API_KEY
-          }
-        }
-      );
-      
-      // Return the AI response from the API
-      console.log("API response:", response.data);
-      return response.data.response || response.data.reply || response.data.message || "I'm sorry, I couldn't generate a response at this time.";
-    } catch (error) {
-      console.error("API call failed:", error);
-      toast.error("Couldn't reach our herbal wisdom server. Using backup knowledge instead.");
-      
-      // Return a mock response as fallback
-      return getRandomMockResponse();
-    }
-  };
-
   // Generate a random response for demo purposes when API fails
   const getRandomMockResponse = () => {
     const randomIndex = Math.floor(Math.random() * mockResponses.length);
     return mockResponses[randomIndex];
+  };
+
+  // Call the actual API using fetch and Vite proxy
+  const callHerbalAPI = async (userMessage: string) => {
+    try {
+      const response = await fetch('/api/prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'API_KEY': API_KEY,
+        },
+        body: JSON.stringify({
+          prompt: userMessage,
+          userId: "user-" + Date.now(),
+          timestamp: new Date().toISOString(),
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
+      }
+
+      const data = await response.json();
+      console.log('HerbalAI API raw response:', data); // Debug log
+      // Try both 'reply' and 'response' keys for compatibility
+      return data.reply || data.response || "I'm sorry, I couldn't generate a response at this time.";
+    } catch (error) {
+      console.error("API call failed:", error);
+      toast.error("Couldn't reach our herbal wisdom server. Using backup knowledge instead.");
+      // Return a mock response as fallback
+      return getRandomMockResponse();
+    }
   };
 
   const handleSendMessage = async () => {

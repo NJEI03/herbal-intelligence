@@ -53,10 +53,14 @@ export function ChatInterface() {
     return mockResponses[randomIndex];
   };
 
+   const API_URL = "https://herbalai.deepxlabs.tech/api/prompt"; 
+    import.meta.env.PROD ? "https://herbalai.deepxlabs.tech/api/prompt" : "api/prompt";
+
   // Call the actual API using fetch and Vite proxy
   const callHerbalAPI = async (userMessage: string) => {
+   
     try {
-      const response = await fetch('/api/prompt', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -21,8 +21,10 @@ const mockResponses = [
   "Lemon balm (Melissa officinalis) has a long history of use for mild anxiety and stress. It can be consumed as a pleasant-tasting tea, 2-3 times daily. Are you currently taking any medications that might interact with herbal supplements?",
 ];
 
-// API endpoint for herbal consultation
-const API_URL = "https://herbalai.deepxlabs.tech/api/prompt"; // Updated API endpoint
+// Use Netlify Function proxy in production, Vite proxy in development
+const API_URL = import.meta.env.PROD
+  ? "/.netlify/functions/herbal-proxy"
+  : "/api/prompt";
 const API_KEY = "68289d7d0ce9b"; // API key for authentication
 
 export function ChatInterface() {
@@ -53,11 +55,8 @@ export function ChatInterface() {
     return mockResponses[randomIndex];
   };
 
-   const API_URL =  import.meta.env.PROD ? "https://herbalai.deepxlabs.tech/api/prompt" : "api/prompt";
-
-  // Call the actual API using fetch and Vite proxy
+  // Call the actual API using fetch and Vite/Netlify proxy
   const callHerbalAPI = async (userMessage: string) => {
-   
     try {
       const response = await fetch(API_URL, {
         method: 'POST',

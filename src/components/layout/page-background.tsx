@@ -1,8 +1,12 @@
 
-import { ChatInterface } from "@/components/consult/chat-interface";
+import { ReactNode } from "react";
 import { BackgroundEffect } from "@/components/effects/background-effect";
 
-const Consult = () => {
+type PageBackgroundProps = {
+  children: ReactNode;
+};
+
+export function PageBackground({ children }: PageBackgroundProps) {
   return (
     <div className="min-h-screen bg-herbal-background relative">
       <BackgroundEffect />
@@ -13,13 +17,9 @@ const Consult = () => {
           className="w-full h-full object-contain opacity-30"
         />
       </div>
-      <div className="relative z-10 h-[calc(100vh-4rem)] py-8">
-        <div className="container h-full">
-          <ChatInterface />
-        </div>
+      <div className="relative z-10 py-8">
+        {children}
       </div>
     </div>
   );
-};
-
-export default Consult;
+}

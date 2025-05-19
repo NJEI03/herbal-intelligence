@@ -46,6 +46,8 @@ export function ChatInterface() {
   // Call the actual API through our proxy
   const callHerbalAPI = async (userMessage: string) => {
     try {
+      console.log("Calling API with message:", userMessage);
+      
       const response = await fetch('/api/prompt', {
         method: 'POST',
         headers: {
@@ -57,14 +59,30 @@ export function ChatInterface() {
         })
       });
       
+      console.log("API response status:", response.status);
+      
+      // Check if response is OK
       if (!response.ok) {
-        throw new Error('Failed to get response');
+        const errorText = await response.text();
+        console.error("API error:", errorText);
+        throw new Error(`Failed to get response: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
+      // First try to get the response as text to debug
+      const responseText = await response.text();
+      console.log("Raw API response:", responseText);
+      
+      // Try to parse it as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse JSON:", parseError);
+        throw new Error("Invalid JSON response from API");
+      }
       
       // Return the AI response from the API
-      console.log("API response:", data);
+      console.log("Parsed API response:", data);
       return data.response || data.reply || data.message || "I'm sorry, I couldn't generate a response at this time.";
     } catch (error) {
       console.error("API call failed:", error);

@@ -2,11 +2,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Upload, X, Image, ImagePlus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export function UploadSection() {
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    file: File;
+    previewUrl: string;
+    id: string;
+  }[]>([]);
+  const { toast } = useToast();
+
+  const MAX_FILES = 5;
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -22,45 +31,151 @@ export function UploadSection() {
     setIsDragging(false);
     
     const files = e.dataTransfer.files;
-    handleFiles(files);
+    processFiles(files);
   };
   
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      handleFiles(files);
+      processFiles(files);
     }
+    // Reset the input value so the same file can be uploaded again if removed
+    e.target.value = '';
   };
   
-  const handleFiles = (files: FileList) => {
-    if (files.length > 0) {
-      const file = files[0];
-      if (file.type.startsWith("image/")) {
-        setSelectedFile(file);
-        const reader = new FileReader();
-        reader.onload = () => {
-          setPreviewUrl(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+  const processFiles = (files: FileList) => {
+    if (uploadedFiles.length + files.length > MAX_FILES) {
+      toast({
+        title: "Too many files",
+        description: `You can upload a maximum of ${MAX_FILES} images at once.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newFiles = Array.from(files).map(file => {
+      // Check if file is an image
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Invalid file type",
+          description: `${file.name} is not an image. Please upload only images.`,
+          variant: "destructive",
+        });
+        return null;
       }
-    }
+      
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          title: "File too large",
+          description: `${file.name} exceeds the 10MB limit.`,
+          variant: "destructive",
+        });
+        return null;
+      }
+      
+      return {
+        file,
+        previewUrl: URL.createObjectURL(file),
+        id: crypto.randomUUID(),
+      };
+    }).filter(Boolean);
+    
+    setUploadedFiles(prev => [...prev, ...newFiles]);
   };
   
-  const clearSelectedFile = () => {
-    setSelectedFile(null);
-    setPreviewUrl(null);
+  const removeFile = (id: string) => {
+    setUploadedFiles(prev => {
+      const newFiles = prev.filter(file => file.id !== id);
+      // Release the object URL to free memory
+      const fileToRemove = prev.find(file => file.id === id);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.previewUrl);
+      }
+      return newFiles;
+    });
+  };
+
+  const identifyPlants = () => {
+    // This would be connected to the backend API in a real implementation
+    toast({
+      title: "Processing images",
+      description: `Identifying ${uploadedFiles.length} plant image${uploadedFiles.length > 1 ? 's' : ''}.`,
+    });
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-white/90 backdrop-blur-sm shadow-md">
       <div className="text-center mb-6">
         <h2 className="font-montserrat font-semibold text-xl mb-2">Plant Identification</h2>
         <p className="text-herbal-text-secondary">
-          Upload a clear photo of a plant to identify it and learn about its medicinal properties
+          Upload clear photos to identify plants and learn about their medicinal properties
         </p>
       </div>
       
-      {!selectedFile ? (
+      {uploadedFiles.length > 0 ? (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {uploadedFiles.map((uploadedFile) => (
+              <div key={uploadedFile.id} className="relative group">
+                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                  <img 
+                    src={uploadedFile.previewUrl} 
+                    alt="Uploaded plant" 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                <button 
+                  className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full hover:bg-white transition-colors shadow-sm opacity-0 group-hover:opacity-100"
+                  onClick={() => removeFile(uploadedFile.id)}
+                  aria-label="Remove image"
+                >
+                  <X size={16} />
+                </button>
+                <p className="mt-1 text-sm text-gray-600 truncate">{uploadedFile.file.name}</p>
+              </div>
+            ))}
+            
+            {/* Add more images button */}
+            {uploadedFiles.length < MAX_FILES && (
+              <label htmlFor="add-more-files" className="cursor-pointer">
+                <div className="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:border-herbal-primary hover:bg-herbal-primary/5 transition-colors">
+                  <ImagePlus size={24} className="mb-2 text-herbal-primary" />
+                  <span className="text-sm text-herbal-primary font-medium">Add more</span>
+                </div>
+                <input
+                  id="add-more-files"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  multiple
+                  onChange={handleFileInput}
+                />
+              </label>
+            )}
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <Button 
+              variant="outline" 
+              onClick={() => setUploadedFiles([])}
+              className="text-sm"
+            >
+              Clear all
+            </Button>
+            <Button 
+              className="bg-herbal-primary hover:bg-herbal-primary/90" 
+              onClick={identifyPlants}
+            >
+              Identify Plants
+            </Button>
+          </div>
+          
+          <p className="text-xs text-herbal-text-secondary text-center">
+            For best results, ensure plants are well-lit and the image focuses on distinguishing features like leaves, flowers, or fruit.
+          </p>
+        </div>
+      ) : (
         <div
           className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
             isDragging ? "border-herbal-primary bg-herbal-primary/5" : "border-gray-300 hover:border-herbal-primary"
@@ -71,16 +186,11 @@ export function UploadSection() {
         >
           <div className="mb-4">
             <div className="w-16 h-16 bg-herbal-primary/10 rounded-full flex items-center justify-center mx-auto">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-herbal-primary">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <circle cx="10" cy="13" r="2"></circle>
-                <path d="m20 17-1.09-1.09a2 2 0 0 0-2.82 0L10 22"></path>
-              </svg>
+              <Upload className="text-herbal-primary" size={32} />
             </div>
           </div>
           <p className="font-medium mb-1">
-            Drag & drop your plant image here
+            Drag & drop plant images here
           </p>
           <p className="text-sm text-herbal-text-secondary mb-4">
             or click to browse from your device
@@ -94,41 +204,12 @@ export function UploadSection() {
               type="file"
               accept="image/*"
               className="hidden"
+              multiple
               onChange={handleFileInput}
             />
           </label>
           <p className="mt-4 text-xs text-herbal-text-secondary">
-            Supported formats: JPG, PNG, GIF (max 10MB)
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="relative rounded-xl overflow-hidden border border-gray-200">
-            <img 
-              src={previewUrl || ""} 
-              alt="Selected plant" 
-              className="w-full object-cover aspect-[4/3]" 
-            />
-            <button 
-              className="absolute top-2 right-2 bg-white/80 p-1 rounded-full hover:bg-white transition-colors"
-              onClick={clearSelectedFile}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={clearSelectedFile}>
-              Change Image
-            </Button>
-            <Button className="bg-herbal-primary hover:bg-herbal-primary/90">
-              Identify Plant
-            </Button>
-          </div>
-          <p className="text-xs text-herbal-text-secondary text-center">
-            For best results, ensure the plant is well-lit and the image focuses on distinguishing features like leaves, flowers, or fruit.
+            Upload up to {MAX_FILES} images (JPG, PNG, GIF - max 10MB each)
           </p>
         </div>
       )}

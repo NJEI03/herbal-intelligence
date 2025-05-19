@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import axios from "axios";
 import { Mic, MicOff } from "lucide-react";
 
 type Message = {
@@ -13,7 +14,11 @@ type Message = {
   timestamp: Date;
 };
 
-// Mock responses only for fallback if API fails
+// API configuration
+const API_URL = "https://herbalai.deepxlabs.tech/api/prompt";
+const API_KEY = "68289d7d0ce9b";
+
+// Mock responses for fallback if API fails
 const mockResponses = [
   "Based on your symptoms, I recommend considering ginger root (Zingiber officinale), which has been traditionally used to address digestive discomfort. You can prepare it as a tea by steeping fresh ginger slices in hot water for 5-10 minutes. Would you like to know more about ginger or explore other options?",
   "For mild insomnia, valerian root (Valeriana officinalis) has been used traditionally across many cultures. It's typically consumed as a tea or tincture about 30 minutes before bedtime. Would you like to learn about proper dosage or alternative herbs for sleep support?",
@@ -43,47 +48,23 @@ export function ChatInterface() {
     }
   }, [messages]);
 
-  // Call the actual API through our proxy
+  // Call the actual API with proper headers
   const callHerbalAPI = async (userMessage: string) => {
     try {
-      console.log("Calling API with message:", userMessage);
-      
-      const response = await fetch('/api/prompt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'API_KEY': '68289d7d0ce9b'
-        },
-        body: JSON.stringify({
-          message: userMessage
-        })
-      });
-      
-      console.log("API response status:", response.status);
-      
-      // Check if response is OK
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API error:", errorText);
-        throw new Error(`Failed to get response: ${response.status} ${response.statusText}`);
-      }
-      
-      // First try to get the response as text to debug
-      const responseText = await response.text();
-      console.log("Raw API response:", responseText);
-      
-      // Try to parse it as JSON
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error("Failed to parse JSON:", parseError);
-        throw new Error("Invalid JSON response from API");
-      }
+      const response = await axios.post(
+        API_URL,
+        { message: userMessage },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'API_KEY': API_KEY
+          }
+        }
+      );
       
       // Return the AI response from the API
-      console.log("Parsed API response:", data);
-      return data.response || data.reply || data.message || "I'm sorry, I couldn't generate a response at this time.";
+      console.log("API response:", response.data);
+      return response.data.response || response.data.reply || response.data.message || "I'm sorry, I couldn't generate a response at this time.";
     } catch (error) {
       console.error("API call failed:", error);
       toast.error("Couldn't reach our herbal wisdom server. Using backup knowledge instead.");

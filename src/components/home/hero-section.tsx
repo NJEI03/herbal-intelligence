@@ -31,7 +31,7 @@ export function HeroSection() {
             </div>
           </div>
           
-          <div className="flex items-center justify-center">
+          {/* <div className="flex items-center justify-center">
             <div className="relative bg-white/90 backdrop-blur-sm p-6 rounded-lg shadow-xl w-full max-w-md">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
@@ -71,7 +71,7 @@ export function HeroSection() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

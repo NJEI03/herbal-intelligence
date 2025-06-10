@@ -1,14 +1,91 @@
-
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getAuth, signOut, User } from "firebase/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import app from "@/lib/firebase"; // Corrected import for `app`
+
+interface UserData {
+  role: 'user' | 'vendor';
+}
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+  const auth = getAuth(app);
+  const [user, loading, error] = useAuthState(auth);
+  const [userRole, setUserRole] = useState<UserData['role'] | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserRole = async (currentUser: User) => {
+      try {
+        const db = getFirestore(app);
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data() as UserData;
+          setUserRole(userData.role);
+        } else {
+          console.warn("User document not found in Firestore.");
+          setUserRole('user'); // Default to user if document not found
+        }
+      } catch (err) {
+        console.error("Error fetching user role:", err);
+        setUserRole('user'); // Default to user on error
+      }
+    };
+
+    if (user && !loading) {
+      fetchUserRole(user);
+    } else if (!user && !loading) {
+      setUserRole(null); // Reset role if user logs out
+    }
+  }, [user, loading]);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/'); // Redirect to home page after logout
+      setIsMenuOpen(false); // Close mobile menu after logout
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  const renderAuthButtons = () => {
+    if (loading) {
+      return null; // Or a loading spinner
+    } else if (user) {
+      const dashboardPath = userRole === 'vendor' ? '/vendor' : '/dashboard';
+      return (
+        <div className="flex items-center gap-2">
+          <Button size="sm" asChild>
+            <Link to={dashboardPath}>Dashboard</Link>
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleLogout}>
+            Logout
+          </Button>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/login">Log in</Link>
+          </Button>
+          <Button size="sm" className="bg-herbal-primary hover:bg-herbal-primary/90" asChild>
+            <Link to="/signup">Sign up</Link>
+          </Button>
+        </div>
+      );
+    }
   };
 
   return (
@@ -68,14 +145,7 @@ export function Navbar() {
           <Link to="/learn" className="text-herbal-text-primary hover:text-herbal-primary transition-colors">
             Learn
           </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/login">Log in</Link>
-            </Button>
-            <Button size="sm" className="bg-herbal-primary hover:bg-herbal-primary/90" asChild>
-              <Link to="/signup">Sign up</Link>
-            </Button>
-          </div>
+          {renderAuthButtons()}
         </nav>
       </div>
       
@@ -130,12 +200,7 @@ export function Navbar() {
             Learn
           </Link>
           <div className="flex flex-col gap-2 mt-2">
-            <Button variant="outline" className="w-full" asChild>
-              <Link to="/login" onClick={() => setIsMenuOpen(false)}>Log in</Link>
-            </Button>
-            <Button className="w-full bg-herbal-primary hover:bg-herbal-primary/90" asChild>
-              <Link to="/signup" onClick={() => setIsMenuOpen(false)}>Sign up</Link>
-            </Button>
+            {renderAuthButtons()}
           </div>
         </nav>
       </div>

@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { getProducts, getUserProducts, testFirestoreConnection } from "@/lib/firestore";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext"; // Import useCart
+import { ShoppingBag, Search, Heart, Star } from "lucide-react";
+import { Link } from "react-router-dom"; // Import Link
+import { ProductCard } from "@/components/product/ProductCard"; // Import ProductCard
 
 interface Product {
   id: string;
@@ -18,118 +23,106 @@ interface Product {
   category: 'teas' | 'tinctures' | 'supplements' | 'topicals';
   tags: string[];
   stock: number;
+  rating: number;
+  vendorId?: string;
 }
 
-const Store = () => {
+export default function Store() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [userProducts, setUserProducts] = useState<Product[]>([]); // State for vendor's products
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const products: Product[] = [
-    {
-      id: "moringa-tea",
-      name: "Organic Moringa Tea",
-      description: "High-antioxidant herbal tea made from pure moringa leaves. Supports immune function and provides natural energy.",
-      price: 12.99,
-      imageUrl: "/placeholder.svg",
-      category: 'teas',
-      tags: ['immune support', 'energy', 'detox'],
-      stock: 15
-    },
-    {
-      id: "hibiscus-blend",
-      name: "Hibiscus Flower Blend",
-      description: "A refreshing blend of hibiscus flowers with natural citrus notes. Supports cardiovascular health and provides vitamin C.",
-      price: 9.99,
-      imageUrl: "/placeholder.svg",
-      category: 'teas',
-      tags: ['heart health', 'antioxidant', 'cooling'],
-      stock: 22
-    },
-    {
-      id: "ashwagandha-tincture",
-      name: "Ashwagandha Root Tincture",
-      description: "Potent adaptogenic tincture that helps the body manage stress and supports overall wellbeing.",
-      price: 24.99,
-      imageUrl: "/placeholder.svg",
-      category: 'tinctures',
-      tags: ['stress relief', 'adaptogen', 'sleep support'],
-      stock: 8
-    },
-    {
-      id: "elderberry-tincture",
-      name: "Elderberry Immune Tincture",
-      description: "Traditional immune-supporting tincture made from organic elderberries. Perfect for seasonal wellness.",
-      price: 19.99,
-      imageUrl: "/placeholder.svg",
-      category: 'tinctures',
-      tags: ['immune support', 'antiviral', 'seasonal'],
-      stock: 12
-    },
-    {
-      id: "turmeric-caps",
-      name: "Turmeric & Black Pepper Capsules",
-      description: "High-potency turmeric capsules with black pepper for enhanced absorption. Supports joint health and reduces inflammation.",
-      price: 29.99,
-      imageUrl: "/placeholder.svg",
-      category: 'supplements',
-      tags: ['anti-inflammatory', 'joint health', 'daily'],
-      stock: 30
-    },
-    {
-      id: "mushroom-complex",
-      name: "5 Mushroom Immune Complex",
-      description: "Powerful blend of reishi, chaga, lion's mane, turkey tail, and maitake mushrooms for comprehensive immune support.",
-      price: 34.99,
-      imageUrl: "/placeholder.svg",
-      category: 'supplements',
-      tags: ['immune support', 'adaptogen', 'vitality'],
-      stock: 18
-    },
-    {
-      id: "aloe-balm",
-      name: "Aloe & Calendula Healing Balm",
-      description: "Soothing balm for minor skin irritations, burns, and cuts. Made with organic aloe vera and calendula.",
-      price: 15.99,
-      imageUrl: "/placeholder.svg",
-      category: 'topicals',
-      tags: ['skin healing', 'burns', 'cuts'],
-      stock: 25
-    },
-    {
-      id: "arnica-salve",
-      name: "Arnica Muscle Relief Salve",
-      description: "Fast-acting relief for sore muscles and bruises. Made with arnica montana and essential oils.",
-      price: 18.99,
-      imageUrl: "/placeholder.svg",
-      category: 'topicals',
-      tags: ['pain relief', 'muscle soreness', 'bruises'],
-      stock: 14
-    }
-  ];
+  const { user, loading } = useAuth();
+  const { addToCart } = useCart(); // Destructure addToCart from useCart
 
-  const addToCart = (product: Product) => {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productsData = await getProducts();
+        setProducts(productsData);
+        setFilteredProducts(productsData);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load products. Please try again later.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserSpecificProducts = async () => {
+      if (user) {
+        try {
+          const productsData = await getUserProducts(user.uid);
+          setUserProducts(productsData);
+        } catch (error) {
+          console.error("Error fetching user products:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load your products.",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+    fetchUserSpecificProducts();
+  }, [user]);
+
+  useEffect(() => {
+    let currentProducts = products;
+
+    if (activeTab !== 'all') {
+      currentProducts = currentProducts.filter(product => product.category === activeTab);
+    }
+
+    if (searchQuery) {
+      currentProducts = currentProducts.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    setFilteredProducts(currentProducts);
+  }, [activeTab, searchQuery, products]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Filtering is already handled by useEffect based on searchQuery state
+  };
+
+  const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>, product: Product) => {
+    e.stopPropagation();
+    addToCart(product); // Use the addToCart function from useCart
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
     });
   };
 
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
   return (
-    <Container className="py-16">
+    <Container>
       <SectionHeading 
-        title="Herbal Store" 
+        title="Our Herbal Store"
         subtitle="Ethically sourced herbal products for natural wellness"
         centered
       />
       
       <div className="mt-10 max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="flex justify-end mb-4 gap-2">
+          <Button asChild>
+            <Link to="/cart">View Cart</Link>
+          </Button>
+        </div>
+
+        <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="w-full">
             <Input
               placeholder="Search products by name or benefits..."
@@ -138,7 +131,27 @@ const Store = () => {
               className="w-full"
             />
           </div>
+          <Button type="submit" className="md:w-auto">
+            <Search className="mr-2 h-4 w-4" /> Search
+          </Button>
+        </form>
+        
+        {/* User Products Section - Only show if user has products */}
+        {user && userProducts.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold mb-6">Your Products</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userProducts.map((product) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  onAddToCart={(e) => handleAddToCart(e, product)}
+                  isVendor={true}
+                />
+              ))}
+          </div>
         </div>
+        )}
         
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="grid grid-cols-5 mb-6">
@@ -151,31 +164,51 @@ const Store = () => {
           
           <TabsContent value="all" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                onAddToCart={(e) => handleAddToCart(e, product)}
+              />
             ))}
           </TabsContent>
           
           <TabsContent value="teas" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.filter(product => product.category === 'teas').map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+            {filteredProducts.filter(p => p.category === 'teas').map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                onAddToCart={(e) => handleAddToCart(e, product)}
+              />
             ))}
           </TabsContent>
           
           <TabsContent value="tinctures" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.filter(product => product.category === 'tinctures').map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+            {filteredProducts.filter(p => p.category === 'tinctures').map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                onAddToCart={(e) => handleAddToCart(e, product)}
+              />
             ))}
           </TabsContent>
           
           <TabsContent value="supplements" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.filter(product => product.category === 'supplements').map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+            {filteredProducts.filter(p => p.category === 'supplements').map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                onAddToCart={(e) => handleAddToCart(e, product)}
+              />
             ))}
           </TabsContent>
           
           <TabsContent value="topicals" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.filter(product => product.category === 'topicals').map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+            {filteredProducts.filter(p => p.category === 'topicals').map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                onAddToCart={(e) => handleAddToCart(e, product)}
+              />
             ))}
           </TabsContent>
         </Tabs>
@@ -217,60 +250,3 @@ const Store = () => {
     </Container>
   );
 };
-
-interface ProductCardProps {
-  product: Product;
-  onAddToCart: (product: Product) => void;
-}
-
-const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
-  return (
-    <Card className="overflow-hidden">
-      <div className="aspect-square bg-gray-100">
-        <img 
-          src={product.imageUrl} 
-          alt={product.name} 
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <CardTitle className="text-lg">{product.name}</CardTitle>
-          <div className="text-lg font-semibold text-herbal-primary">${product.price}</div>
-        </div>
-        <CardDescription>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {product.tags.map(tag => (
-              <Badge key={tag} variant="outline" className="text-xs bg-herbal-muted/50">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pb-2">
-        <p className="text-sm text-herbal-text-secondary">{product.description}</p>
-        <div className="mt-2 text-sm text-herbal-primary">
-          {product.stock > 10 ? (
-            <span>In Stock</span>
-          ) : product.stock > 0 ? (
-            <span>Low Stock - Only {product.stock} left</span>
-          ) : (
-            <span className="text-red-500">Out of Stock</span>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button 
-          onClick={() => onAddToCart(product)} 
-          className="w-full"
-          disabled={product.stock === 0}
-        >
-          {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-};
-
-export default Store;

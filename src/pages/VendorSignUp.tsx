@@ -5,15 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createUserProfile } from "@/lib/firestore";
+import { Textarea } from "@/components/ui/textarea";
 
-export default function SignUp() {
+export default function VendorSignUp() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [businessDescription, setBusinessDescription] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signUp, signInWithGoogle, signInWithFacebook } = useAuth();
+  const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,16 +28,20 @@ export default function SignUp() {
       const result = await signUp(email, password);
       const user = result.user;
       
-      // Create user profile
+      // Create vendor profile
       await createUserProfile(user.uid, {
         name,
         email: user.email,
         createdAt: new Date().toISOString(),
-        role: "user",
-        subscription: "free"
+        role: "vendor",
+        businessName,
+        businessDescription,
+        phoneNumber,
+        subscription: "free",
+        products: []
       });
 
-      navigate("/dashboard");
+      navigate("/vendor");
     } catch (err) {
       setError(err.message || "Failed to sign up");
     } finally {
@@ -41,55 +49,13 @@ export default function SignUp() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const result = await signInWithGoogle();
-      const user = result.user;
-      
-      // Create user profile
-      await createUserProfile(user.uid, {
-        name: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        createdAt: new Date().toISOString(),
-        role: "user",
-        subscription: "free"
-      });
-
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.message || "Failed to sign up with Google");
-    }
-  };
-
-  const handleFacebookSignIn = async () => {
-    try {
-      const result = await signInWithFacebook();
-      const user = result.user;
-      
-      // Create user profile
-      await createUserProfile(user.uid, {
-        name: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        createdAt: new Date().toISOString(),
-        role: "user",
-        subscription: "free"
-      });
-
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.message || "Failed to sign up with Facebook");
-    }
-  };
-
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Create Account</CardTitle>
+          <CardTitle className="text-2xl text-center">Create Vendor Account</CardTitle>
           <CardDescription className="text-center">
-            Sign up to get started
+            Sign up to start selling your products
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -107,6 +73,49 @@ export default function SignUp() {
                 placeholder="Enter your full name"
               />
             </div>
+
+            <div className="space-y-2">
+              <label htmlFor="businessName" className="text-sm font-medium">
+                Business Name
+              </label>
+              <Input
+                id="businessName"
+                type="text"
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                required
+                placeholder="Enter your business name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="businessDescription" className="text-sm font-medium">
+                Business Description
+              </label>
+              <Textarea
+                id="businessDescription"
+                value={businessDescription}
+                onChange={(e) => setBusinessDescription(e.target.value)}
+                required
+                placeholder="Describe your business and products"
+                className="min-h-[100px]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="phoneNumber" className="text-sm font-medium">
+                Phone Number
+              </label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                required
+                placeholder="Enter your phone number"
+              />
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
                 Email
@@ -120,6 +129,7 @@ export default function SignUp() {
                 placeholder="Enter your email"
               />
             </div>
+
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
                 Password
@@ -133,46 +143,18 @@ export default function SignUp() {
                 placeholder="Create a password"
               />
             </div>
+
             {error && (
               <div className="text-red-500 text-sm text-center">{error}</div>
             )}
+
             <Button
               type="submit"
               className="w-full bg-herbal-primary hover:bg-herbal-primary/90"
               disabled={loading}
             >
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? "Creating account..." : "Create Vendor Account"}
             </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGoogleSignIn}
-                className="w-full"
-              >
-                Google
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleFacebookSignIn}
-                className="w-full"
-              >
-                Facebook
-              </Button>
-            </div>
 
             <div className="text-center text-sm">
               Already have an account?{" "}
@@ -189,4 +171,4 @@ export default function SignUp() {
       </Card>
     </div>
   );
-}
+} 

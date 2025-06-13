@@ -1,8 +1,25 @@
-
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
 
 export function HeroSection() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <section className="relative py-20 overflow-hidden">
       <div className="container relative z-10">
@@ -29,49 +46,26 @@ export function HeroSection() {
                 <Link to="/learn">Learn More</Link>
               </Button>
             </div>
+            {!user && (
+              <Button 
+                className="space-y-3"
+                variant="outline"
+                onClick={() => navigate("/vendor-signup")}
+              >
+                Become a Vendor
+              </Button>
+            )}
           </div>
           
-          {/* <div className="flex items-center justify-center">
-            <div className="relative bg-white/90 backdrop-blur-sm p-6 rounded-lg shadow-xl w-full max-w-md">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="/lovable-uploads/cab56773-7d06-44ec-9010-f4806f6577cd.png" 
-                    alt="Herbal Intelligence" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h2 className="text-xl font-semibold">Join Herbal Intelligence</h2>
-              </div>
-              <p className="text-herbal-text-secondary mb-6">Access personalized herbal recommendations and connect with traditional practitioners.</p>
-              
-              <div className="space-y-3">
-                <Button className="w-full flex justify-center items-center gap-2 bg-[#4285F4] hover:bg-[#4285F4]/90">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
-                    <path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81Z" />
-                  </svg>
-                  Continue with Google
-                </Button>
-                <Button className="w-full flex justify-center items-center gap-2 bg-[#1877F2] hover:bg-[#1877F2]/90">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
-                    <path d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z" />
-                  </svg>
-                  Continue with Facebook
-                </Button>
-                <div className="relative flex py-3 items-center">
-                  <div className="flex-grow border-t border-gray-300"></div>
-                  <span className="flex-shrink mx-3 text-gray-500 text-sm">or</span>
-                  <div className="flex-grow border-t border-gray-300"></div>
-                </div>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/signup">Sign up with Email</Link>
-                </Button>
-                <div className="text-center text-sm text-herbal-text-secondary mt-3">
-                  Already have an account? <Link to="/login" className="text-herbal-primary hover:underline">Log in</Link>
-                </div>
-              </div>
+          {!isMobile && (
+            <div className="flex items-center justify-center">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/achupride-260e7.firebasestorage.app/o/image-removebg-preview.png?alt=media&token=1ff2b665-f707-4551-87e0-37ed66467c27" 
+                alt="Herbal Intelligence App Screenshot"
+                className=" max-w-sm md:max-w-md lg:max-w-lg object-contain transform -rotate-"
+              />
             </div>
-          </div> */}
+          )}
         </div>
       </div>
     </section>

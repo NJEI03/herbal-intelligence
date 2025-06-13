@@ -1,19 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ref, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 
 const Practitioners = () => {
   const [searchLocation, setSearchLocation] = useState("");
-
-  const practitioners = [
+  const [practitioners, setPractitioners] = useState([
     {
       id: 1,
       name: "Dr. Amara Okafor",
-      image: "https://images.unsplash.com/photo-1601233749202-95d04d5b3c00?auto=format&fit=crop&q=80&w=200&h=200",
+      image: "gs://achupride-260e7.firebasestorage.app/doctor 1.jfif",
       specialty: "Traditional African Medicine",
       location: "Douala, Cameroon",
       languages: ["English", "French", "Duala"],
@@ -24,7 +25,7 @@ const Practitioners = () => {
     {
       id: 2,
       name: "Marie Nguema",
-      image: "https://images.unsplash.com/photo-1612462766564-8d2cce92cb95?auto=format&fit=crop&q=80&w=200&h=200",
+      image: "gs://achupride-260e7.firebasestorage.app/female doc.jfif",
       specialty: "Central African Herbalism",
       location: "Yaoundé, Cameroon",
       languages: ["French", "English", "Ewondo"],
@@ -35,7 +36,7 @@ const Practitioners = () => {
     {
       id: 3,
       name: "Dr. Emmanuel Fongod",
-      image: "https://images.unsplash.com/photo-1603366615917-1fa6dad5c4fa?auto=format&fit=crop&q=80&w=200&h=200",
+      image: "gs://achupride-260e7.firebasestorage.app/doctor 2.jfif",
       specialty: "Rainforest Medicinal Plants",
       location: "Buea, Cameroon",
       languages: ["English", "French", "Pidgin"],
@@ -54,7 +55,31 @@ const Practitioners = () => {
       bio: "Specializing in women's reproductive health using traditional plant-based remedies. Josephine combines ancestral knowledge with contemporary healthcare practices.",
       verified: true,
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchImageUrls = async () => {
+      const updatedPractitioners = await Promise.all(
+        practitioners.map(async (p) => {
+          if (p.image.startsWith("gs://")) {
+            try {
+              const imageRef = ref(storage, p.image);
+              const url = await getDownloadURL(imageRef);
+              return { ...p, image: url };
+            } catch (error) {
+              console.error(`Error fetching image for ${p.name}:`, error);
+              return p; // Return original practitioner if image fetch fails
+            }
+          } else {
+            return p;
+          }
+        })
+      );
+      setPractitioners(updatedPractitioners);
+    };
+
+    fetchImageUrls();
+  }, []); // Empty dependency array means this runs once on mount
 
   return (
     <div className="py-8">

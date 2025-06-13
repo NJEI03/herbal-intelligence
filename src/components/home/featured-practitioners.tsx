@@ -1,4 +1,3 @@
-
 import { SectionHeading } from "../ui/section-heading";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
@@ -8,21 +7,21 @@ export function FeaturedPractitioners() {
     {
       name: "Dr. Amara Okafor",
       specialty: "Traditional African Medicine",
-      image: "https://images.unsplash.com/photo-1601233749202-95d04d5b3c00?auto=format&fit=crop&q=80&w=200&h=200",
+      image: "gs://achupride-260e7.firebasestorage.app/doctor 1.jfif",
       location: "Douala, Cameroon",
       verified: true,
     },
     {
       name: "Marie Nguema",
       specialty: "Central African Herbalism",
-      image: "https://images.unsplash.com/photo-1612462766564-8d2cce92cb95?auto=format&fit=crop&q=80&w=200&h=200",
+      image: "gs://achupride-260e7.firebasestorage.app/doctor 2.jfif",
       location: "Yaoundé, Cameroon",
       verified: true,
     },
     {
       name: "Dr. Emmanuel Fongod",
       specialty: "Rainforest Medicinal Plants",
-      image: "https://images.unsplash.com/photo-1603366615917-1fa6dad5c4fa?auto=format&fit=crop&q=80&w=200&h=200",
+      image: "gs://achupride-260e7.firebasestorage.app/female doc.jfif",
       location: "Buea, Cameroon",
       verified: true,
     },

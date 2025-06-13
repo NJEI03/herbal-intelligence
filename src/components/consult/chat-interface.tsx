@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import axios from "axios";
 import { Mic, MicOff } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 type Message = {
   id: string;
@@ -25,7 +26,7 @@ const mockResponses = [
 const API_URL = import.meta.env.PROD
   ? "/.netlify/functions/herbal-proxy"
   : "/api/prompt";
-const API_KEY = "68289d7d0ce9b"; // API key for authentication
+const API_KEY = import.meta.env.VITE_API_KEY; // API key for authentication
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -182,7 +183,9 @@ export function ChatInterface() {
                   : "bg-white border border-herbal-secondary/20 rounded-tl-none"
               )}
             >
-              {message.content}
+              <div className="whitespace-pre-line break-words prose prose-sm max-w-none">
+                {message.content}
+              </div>
             </div>
             <div
               className={cn(
